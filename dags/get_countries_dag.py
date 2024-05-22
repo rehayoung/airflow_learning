@@ -45,18 +45,20 @@ def load(tranformed_data,schema):
     cur = get_Redshift_connection()
     
     # Table 생성
-    cur.execute(f"CREATE TABLE IF NOT EXISTS {schema}.countries (
-                    country VARCHAR(256),
-                    population INTEGER,
-                    area FLOAT
-    )")
+    cur.execute(f"""
+        CREATE TABLE IF NOT EXISTS {schema}.countries (
+            country VARCHAR(256),
+            population INTEGER,
+            area FLOAT
+        )
+    """)
     # Full refresh 로 구성 
     try : 
         cur.execute("BEGIN")
         cur.execute(f"DELETE FROM {schema}.countries")
         for row in transformed_data:
-            cur.execute(f'INSERT INTO {schema}.countries ( country, population, area)
-                        VALUES ({row['country']},{row['population']},{row['area']})')
+            cur.execute(f"""INSERT INTO {schema}.countries ( country, population, area)
+                        VALUES ({row['country']},{row['population']},{row['area']})""")
         cur.execute("COMMIT")
     except (Exception, psycopg2.DatabaseError) as error: 
         print(error)
